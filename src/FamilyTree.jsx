@@ -1,5 +1,5 @@
 // Rootswood · Full React SPA  ·  connects to Go backend on :8080
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 const API = "https://rootswood-api.onrender.com/api";
 
@@ -310,7 +310,16 @@ function layoutTree(members, relationships) {
   for (let i = 0; i < 5; i++) { resolveOverlaps(); recentreParents(); }
   resolveOverlaps(); // final cleanup pass
 
-  /* ── 6. posMap from final unitCX ───────────────────────────────────────── */
+  /* ── 6. Shift entire layout right if any node bleeds past left edge ─────── */
+  const minLeft = Math.min(...gens.flatMap(g =>
+    units[g].map(u => (unitCX[u.uid] ?? 0) - unitWidth(u) / 2)
+  ));
+  if (minLeft < PADDING) {
+    const shift = PADDING - minLeft;
+    gens.forEach(g => units[g].forEach(u => { if (unitCX[u.uid] != null) unitCX[u.uid] += shift; }));
+  }
+
+  /* ── 7. posMap from final unitCX ───────────────────────────────────────── */
   const maxRight = Math.max(0, ...gens.flatMap(g =>
     units[g].map(u => (unitCX[u.uid] ?? 0) + unitWidth(u) / 2)
   ));
@@ -898,6 +907,16 @@ function TreeView({treeId,navigate,showToast}){
   const [addModal,setAddModal]=useState(false);
   const [editModal,setEditModal]=useState(null);
   const [confirmDel,setConfirmDel]=useState(false);
+  const [sidebarOpen,setSidebarOpen]=useState(true);
+  const scrollRef = useRef(null);
+
+  // Auto-centre the canvas horizontally whenever layout changes
+  useEffect(()=>{
+    if(!scrollRef.current||!members.length) return;
+    const el = scrollRef.current;
+    const centre = (el.scrollWidth - el.clientWidth) / 2;
+    el.scrollLeft = centre;
+  },[members.length, treeId]);
 
   const load=useCallback(async()=>{
     if(!treeId) return;
@@ -955,7 +974,7 @@ function TreeView({treeId,navigate,showToast}){
         </div>
 
         {/* canvas scroll */}
-        <div style={{flex:1,overflow:"auto",position:"relative",background:"var(--cream)"}}>
+        <div ref={scrollRef} style={{flex:1,overflow:"auto",position:"relative",background:"var(--cream)"}}>
           {members.length===0?(
             <div className="empty" style={{minHeight:400}}>
               <Icon name="users" size={48} style={{color:"var(--warm)"}}/>
@@ -964,7 +983,8 @@ function TreeView({treeId,navigate,showToast}){
               <button className="btn btn-primary" onClick={()=>setAddModal(true)}><Icon name="plus" size={16}/> Add first member</button>
             </div>
           ):layout&&(
-            <div style={{position:"relative",width:layout.CANVAS_W,height:layout.canvasH,minWidth:"100%",padding:"0 20px"}}>
+            <div style={{padding:"24px 60px 40px 60px",display:"inline-block",minWidth:"100%",boxSizing:"border-box"}}>
+            <div style={{position:"relative",width:layout.CANVAS_W,height:layout.canvasH}}>
               {/* SVG edges */}
               <svg style={{position:"absolute",top:0,left:0,overflow:"visible",pointerEvents:"none"}} width={layout.CANVAS_W} height={layout.canvasH}>
                 <defs>
@@ -1039,53 +1059,99 @@ function TreeView({treeId,navigate,showToast}){
                 );
               })}
             </div>
+            </div>
           )}
         </div>
       </div>
 
-      {/* Side panel */}
-      {selMem&&(
-        <div style={{width:250,background:"var(--paper)",borderLeft:"1px solid var(--warm)",padding:20,flexShrink:0,display:"flex",flexDirection:"column",gap:14,overflowY:"auto"}}>
-          <div className="avatar" style={{margin:"0 auto",background:selMem.color+"22",color:selMem.color,width:56,height:56,fontSize:18}}>{selMem.avatar}</div>
-          <div style={{textAlign:"center"}}>
-            <h3 style={{fontSize:17}}>{selMem.name}</h3>
-            <div style={{fontSize:12,color:"var(--fog)",marginTop:3}}>{selMem.relation}</div>
+      {/* ── Collapsible side panel ── */}
+      <div style={{
+        width: sidebarOpen ? 260 : 44,
+        minWidth: sidebarOpen ? 260 : 44,
+        background:"var(--paper)",
+        borderLeft:"1px solid var(--warm)",
+        flexShrink:0,
+        display:"flex",
+        flexDirection:"column",
+        transition:"width .3s cubic-bezier(.4,0,.2,1), min-width .3s cubic-bezier(.4,0,.2,1)",
+        overflow:"hidden",
+        position:"relative",
+      }}>
+        {/* Toggle button */}
+        <button
+          onClick={()=>setSidebarOpen(o=>!o)}
+          title={sidebarOpen?"Collapse panel":"Expand panel"}
+          style={{
+            position:"absolute",top:12,left:sidebarOpen?12:6,
+            width:28,height:28,borderRadius:"50%",
+            border:"1.5px solid var(--warm)",
+            background:"var(--paper)",
+            color:"var(--forest)",
+            cursor:"pointer",
+            display:"flex",alignItems:"center",justifyContent:"center",
+            zIndex:10,
+            boxShadow:"0 2px 8px var(--shadow)",
+            transition:"left .3s cubic-bezier(.4,0,.2,1)",
+            flexShrink:0,
+          }}>
+          <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+            {sidebarOpen
+              ? <polyline points="15 18 9 12 15 6"/>
+              : <polyline points="9 18 15 12 9 6"/>
+            }
+          </svg>
+        </button>
+
+        {/* Expanded content */}
+        {sidebarOpen&&selMem&&(
+          <div style={{paddingTop:52,padding:"52px 16px 16px",display:"flex",flexDirection:"column",gap:14,overflowY:"auto",height:"100%"}}>
+            <div className="avatar" style={{margin:"0 auto",background:selMem.color+"22",color:selMem.color,width:56,height:56,fontSize:18}}>{selMem.avatar}</div>
+            <div style={{textAlign:"center"}}>
+              <h3 style={{fontSize:17}}>{selMem.name}</h3>
+              <div style={{fontSize:12,color:"var(--fog)",marginTop:3}}>{selMem.relation}</div>
+            </div>
+            {selMem.bio&&<div style={{fontSize:13,color:"var(--fog)",lineHeight:1.65}}>{selMem.bio}</div>}
+            <div style={{fontSize:13,display:"flex",flexDirection:"column",gap:5}}>
+              {selMem.born&&<div><strong>Born:</strong> {selMem.born}</div>}
+              {selMem.died&&<div><strong>Died:</strong> {selMem.died}</div>}
+              {selMem.location&&<div><strong>Location:</strong> {selMem.location}</div>}
+            </div>
+            {(()=>{
+              const rels=relationships.filter(r=>r.from_id===selMem.id||r.to_id===selMem.id);
+              if(!rels.length) return null;
+              return(
+                <div>
+                  <div style={{fontSize:11,fontWeight:700,color:"var(--fog)",letterSpacing:".07em",marginBottom:8}}>CONNECTIONS</div>
+                  {rels.map((r,i)=>{
+                    const otherId=r.from_id===selMem.id?r.to_id:r.from_id;
+                    const other=members.find(m=>m.id===otherId); if(!other) return null;
+                    const lbl=r.from_id===selMem.id?r.label:(r.rel_type==="spouse"?"Spouse":r.rel_type==="sibling"?"Sibling":"Child");
+                    const dotC=r.rel_type==="spouse"?"var(--gold)":r.rel_type==="sibling"?"var(--bark)":"var(--forest)";
+                    return(
+                      <div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"5px 0",borderBottom:"1px solid var(--warm)",cursor:"pointer"}} onClick={()=>setSelected(otherId)}>
+                        <div className="avatar" style={{background:other.color+"22",color:other.color,width:26,height:26,fontSize:10}}>{other.avatar}</div>
+                        <div style={{flex:1,fontSize:12,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{other.name.split(" ")[0]}</div>
+                        <span style={{fontSize:10,background:dotC,color:"#fff",padding:"2px 6px",borderRadius:4,fontWeight:600,flexShrink:0}}>{lbl}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })()}
+            <div style={{display:"flex",gap:8,marginTop:"auto"}}>
+              <button className="btn btn-secondary btn-sm" style={{flex:1,justifyContent:"center"}} onClick={()=>setEditModal(selMem)}><Icon name="edit" size={13}/> Edit</button>
+              <button className="btn btn-danger btn-sm" style={{justifyContent:"center"}} onClick={()=>setConfirmDel(true)}><Icon name="trash" size={13}/></button>
+            </div>
           </div>
-          {selMem.bio&&<div style={{fontSize:13,color:"var(--fog)",lineHeight:1.65}}>{selMem.bio}</div>}
-          <div style={{fontSize:13,display:"flex",flexDirection:"column",gap:5}}>
-            {selMem.born&&<div><strong>Born:</strong> {selMem.born}</div>}
-            {selMem.died&&<div><strong>Died:</strong> {selMem.died}</div>}
-            {selMem.location&&<div><strong>Location:</strong> {selMem.location}</div>}
+        )}
+
+        {/* Collapsed — show avatar */}
+        {!sidebarOpen&&selMem&&(
+          <div style={{paddingTop:52,display:"flex",flexDirection:"column",alignItems:"center"}}>
+            <div className="avatar" title={selMem.name} style={{background:selMem.color+"22",color:selMem.color,width:28,height:28,fontSize:10,cursor:"pointer"}} onClick={()=>setSidebarOpen(true)}>{selMem.avatar}</div>
           </div>
-          {/* connections */}
-          {(()=>{
-            const rels=relationships.filter(r=>r.from_id===selMem.id||r.to_id===selMem.id);
-            if(!rels.length) return null;
-            return(
-              <div>
-                <div style={{fontSize:11,fontWeight:700,color:"var(--fog)",letterSpacing:".07em",marginBottom:8}}>CONNECTIONS</div>
-                {rels.map((r,i)=>{
-                  const otherId=r.from_id===selMem.id?r.to_id:r.from_id;
-                  const other=members.find(m=>m.id===otherId); if(!other) return null;
-                  const lbl=r.from_id===selMem.id?r.label:(r.rel_type==="spouse"?"Spouse":r.rel_type==="sibling"?"Sibling":"Child");
-                  const dotC=r.rel_type==="spouse"?"var(--gold)":r.rel_type==="sibling"?"var(--bark)":"var(--forest)";
-                  return(
-                    <div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"5px 0",borderBottom:"1px solid var(--warm)",cursor:"pointer"}} onClick={()=>setSelected(otherId)}>
-                      <div className="avatar" style={{background:other.color+"22",color:other.color,width:26,height:26,fontSize:10}}>{other.avatar}</div>
-                      <div style={{flex:1,fontSize:12,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{other.name.split(" ")[0]}</div>
-                      <span style={{fontSize:10,background:dotC,color:"#fff",padding:"2px 6px",borderRadius:4,fontWeight:600,flexShrink:0}}>{lbl}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            );
-          })()}
-          <div style={{display:"flex",gap:8,marginTop:"auto"}}>
-            <button className="btn btn-secondary btn-sm" style={{flex:1,justifyContent:"center"}} onClick={()=>setEditModal(selMem)}><Icon name="edit" size={13}/> Edit</button>
-            <button className="btn btn-danger btn-sm" style={{justifyContent:"center"}} onClick={()=>setConfirmDel(true)}><Icon name="trash" size={13}/></button>
-          </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
