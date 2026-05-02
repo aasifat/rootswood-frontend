@@ -30,6 +30,7 @@ const GlobalStyle = () => (
       --cream:#F5F0E8;--warm:#EDE5D4;--bark:#8B6F47;--forest:#2D4A3E;
       --moss:#4A7C59;--gold:#C9973A;--rust:#A0522D;--ink:#1A1A14;
       --fog:#9A9488;--paper:#FDFAF5;--shadow:rgba(26,26,20,.12);
+      --bottom-nav-h:64px;
     }
     html,body,#root{height:100%}
     body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);overflow-x:hidden}
@@ -50,7 +51,7 @@ const GlobalStyle = () => (
     .btn-danger:not(:disabled):hover{background:var(--rust);color:#fff}
     .btn-sm{padding:7px 14px;font-size:13px}.btn-xs{padding:5px 10px;font-size:12px}
     .input{width:100%;padding:11px 14px;border:1.5px solid var(--warm);border-radius:8px;
-      font-family:'DM Sans',sans-serif;font-size:14px;background:var(--paper);color:var(--ink);outline:none;transition:border-color .2s}
+      font-family:'DM Sans',sans-serif;font-size:16px;background:var(--paper);color:var(--ink);outline:none;transition:border-color .2s}
     .input:focus{border-color:var(--forest)}
     label{font-size:13px;font-weight:500;color:var(--fog);display:block;margin-bottom:5px}
     .nav-pill{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;cursor:pointer;
@@ -79,23 +80,63 @@ const GlobalStyle = () => (
     .stat-card{background:var(--paper);border:1px solid var(--warm);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:6px}
     /* modal */
     .modal-overlay{position:fixed;inset:0;background:rgba(26,26,20,.55);z-index:200;
-      display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+      display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)}
     .modal-box{background:var(--paper);border-radius:16px;width:100%;max-width:520px;
       box-shadow:0 24px 64px rgba(0,0,0,.3);animation:fadeUp .25s ease both;max-height:92vh;overflow-y:auto}
     /* toast */
-    .toast{position:fixed;bottom:24px;right:24px;z-index:999;padding:12px 20px;border-radius:10px;
+    .toast{position:fixed;bottom:80px;right:16px;z-index:999;padding:12px 20px;border-radius:10px;
       font-size:14px;font-weight:500;color:#fff;animation:fadeUp .3s ease;box-shadow:0 8px 24px rgba(0,0,0,.2)}
     .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:60px 24px;color:var(--fog)}
     @keyframes spin{to{transform:rotate(360deg)}}
     .spinner{width:28px;height:28px;border:3px solid var(--warm);border-top-color:var(--forest);border-radius:50%;animation:spin .7s linear infinite}
-    /* auth pages — centred card on gradient bg, NO sidebar/topbar */
+    /* auth pages */
     .auth-page{min-height:100vh;display:flex;align-items:center;justify-content:center;
-      background:linear-gradient(135deg,var(--cream) 45%,#2D4A3E 100%);padding:24px}
-    /* contact form textarea */
+      background:linear-gradient(135deg,var(--cream) 45%,#2D4A3E 100%);padding:16px}
     textarea.input{resize:vertical;line-height:1.6}
-    /* pill tags */
     .pill{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:500;
       background:rgba(45,74,62,.09);color:var(--forest);border:1px solid rgba(45,74,62,.18)}
+
+    /* ── Bottom nav (mobile only) ── */
+    .bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:var(--bottom-nav-h);
+      background:var(--paper);border-top:1px solid var(--warm);z-index:100;
+      align-items:center;justify-content:space-around;padding:0 4px;
+      box-shadow:0 -4px 16px var(--shadow)}
+    .bottom-nav-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:3px;padding:6px 8px;border:none;background:none;cursor:pointer;color:var(--fog);
+      border-radius:10px;min-width:44px;transition:color .15s}
+    .bottom-nav-btn.active{color:var(--forest)}
+    .bottom-nav-btn span{font-size:10px;font-weight:500;font-family:'DM Sans',sans-serif}
+
+    /* ── Responsive grid helpers ── */
+    .dash-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+    .dash-main{display:grid;grid-template-columns:1fr 290px;gap:20px}
+    .form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .form-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+
+    /* ── Tablet (≤900px) ── */
+    @media(max-width:900px){
+      .dash-stats{grid-template-columns:repeat(2,1fr)}
+      .dash-main{grid-template-columns:1fr}
+    }
+
+    /* ── Mobile (≤640px) ── */
+    @media(max-width:640px){
+      .desktop-sidebar{display:none!important}
+      .desktop-topbar{display:none!important}
+      .bottom-nav{display:flex}
+      .page-with-mobile-nav{padding-bottom:calc(var(--bottom-nav-h) + 12px)!important}
+      .dash-stats{grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
+      .dash-main{grid-template-columns:1fr;gap:14px}
+      .form-grid-2{grid-template-columns:1fr}
+      .form-grid-3{grid-template-columns:1fr 1fr}
+      .modal-box{border-radius:20px 20px 0 0;position:fixed;bottom:0;left:0;right:0;
+        max-width:100%;max-height:90vh;margin:0}
+      .modal-overlay{align-items:flex-end;padding:0}
+      .toast{right:12px;left:12px;bottom:calc(var(--bottom-nav-h) + 8px);text-align:center}
+      .stat-card{padding:14px}
+      .auth-page{padding:12px;align-items:flex-start;padding-top:40px}
+      .tree-toolbar-legend{display:none}
+    }
   `}</style>
 );
 
@@ -564,7 +605,7 @@ function MemberModal({mode="add",member,treeId,members,relationships,onSave,onCl
                 <div style={{fontSize:12,color:"var(--fog)",marginTop:2}}>{form.relation||"Relation…"}{form.born?` · b. ${form.born}`:""}</div>
               </div>
             </div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+            <div className="form-grid-2" style={{gap:12}}>
               <div style={{gridColumn:"1/-1"}}><label>Full name *</label><input className="input" placeholder="e.g. Mary Ashford" value={form.name} onChange={e=>f("name",e.target.value)}/></div>
               <div><label>Relation / role *</label><input className="input" placeholder="e.g. Grandmother…" value={form.relation} onChange={e=>f("relation",e.target.value)}/></div>
               <div><label>Gender</label>
@@ -625,7 +666,7 @@ function MemberModal({mode="add",member,treeId,members,relationships,onSave,onCl
               <>
                 <div style={{marginBottom:14}}>
                   <label>Relationship type</label>
-                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginTop:6}}>
+                  <div className="form-grid-2" style={{gap:8,marginTop:6}}>
                     {[
                       {val:"child",  icon:"↓",label:"Child of",   desc:"This person is a child of the selected member"},
                       {val:"parent", icon:"↑",label:"Parent of",  desc:"This person is a parent of the selected member"},
@@ -669,6 +710,28 @@ function MemberModal({mode="add",member,treeId,members,relationships,onSave,onCl
   );
 }
 
+/* ─── Bottom Nav (mobile) ─────────────────────────────────────────────────── */
+const MOBILE_NAV=[
+  {path:"/dashboard",label:"Home",    icon:"home"},
+  {path:"/tree",      label:"Tree",   icon:"tree"},
+  {path:"/families",  label:"Trees",  icon:"users"},
+  {path:"/export",    label:"Export", icon:"download"},
+  {path:"/settings",  label:"More",   icon:"settings"},
+];
+
+function BottomNav({current,navigate}){
+  return(
+    <nav className="bottom-nav">
+      {MOBILE_NAV.map(r=>(
+        <button key={r.path} className={`bottom-nav-btn${current===r.path?" active":""}`} onClick={()=>navigate(r.path)}>
+          <Icon name={r.icon} size={20}/>
+          <span>{r.label}</span>
+        </button>
+      ))}
+    </nav>
+  );
+}
+
 /* ─── Sidebar ─────────────────────────────────────────────────────────────── */
 const NAV=[
   {path:"/dashboard",label:"Dashboard",    icon:"home"},
@@ -683,7 +746,7 @@ const NAV=[
 
 function Sidebar({current,navigate,collapsed,setCollapsed,user}){
   return(
-    <aside style={{width:collapsed?68:232,flexShrink:0,background:"var(--paper)",borderRight:"1px solid var(--warm)",
+    <aside className="desktop-sidebar" style={{width:collapsed?68:232,flexShrink:0,background:"var(--paper)",borderRight:"1px solid var(--warm)",
       display:"flex",flexDirection:"column",transition:"width .25s",overflow:"hidden",zIndex:10}}>
       <div style={{padding:"22px 18px 18px",display:"flex",alignItems:"center",gap:10}}>
         <div style={{width:34,height:34,borderRadius:8,background:"var(--forest)",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff"}}>
@@ -722,7 +785,7 @@ function Sidebar({current,navigate,collapsed,setCollapsed,user}){
 /* ─── Topbar ──────────────────────────────────────────────────────────────── */
 function Topbar({title,canGoBack,goBack}){
   return(
-    <header style={{height:60,borderBottom:"1px solid var(--warm)",display:"flex",alignItems:"center",
+    <header className="desktop-topbar" style={{height:60,borderBottom:"1px solid var(--warm)",display:"flex",alignItems:"center",
       justifyContent:"space-between",padding:"0 24px",background:"var(--paper)",flexShrink:0,gap:12}}>
       <div style={{display:"flex",alignItems:"center",gap:10,minWidth:0}}>
         {canGoBack&&(
@@ -775,8 +838,7 @@ function Dashboard({navigate,user,trees,onCreateTree}){
   const recentMembers=useState([]); // will be loaded from first tree
 
   return(
-    <div className="page" style={{padding:28,overflowY:"auto",height:"100%"}}>
-      {/* Welcome banner */}
+    <div className="page page-with-mobile-nav" style={{padding:20,overflowY:"auto",height:"100%"}}>
       <div style={{background:"var(--forest)",borderRadius:14,padding:"24px 28px",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:14,marginBottom:24}}>
         <div style={{color:"#fff"}}>
           <div style={{fontSize:13,opacity:.7,marginBottom:4}}>{new Date().getHours()<12?"Good morning":new Date().getHours()<17?"Good afternoon":"Good evening"},</div>
@@ -791,7 +853,7 @@ function Dashboard({navigate,user,trees,onCreateTree}){
       </div>
 
       {/* Stats row */}
-      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:14,marginBottom:24}}>
+      <div className="dash-stats">
         {[
           {label:"Total Members",value:totalMembers,    icon:"users",  color:"var(--forest)"},
           {label:"Generations",  value:trees.length?primaryTree?.member_count>0?"–":"0":"0",icon:"activity",color:"var(--bark)"},
@@ -806,7 +868,7 @@ function Dashboard({navigate,user,trees,onCreateTree}){
         ))}
       </div>
 
-      <div style={{display:"grid",gridTemplateColumns:"1fr 290px",gap:20}}>
+      <div className="dash-main">
         {/* Recent members */}
         <div className="card" style={{padding:22}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:18}}>
@@ -959,7 +1021,7 @@ function TreeView({treeId,navigate,showToast}){
         {/* toolbar */}
         <div style={{padding:"10px 16px",display:"flex",alignItems:"center",gap:12,background:"var(--paper)",borderBottom:"1px solid var(--warm)",flexShrink:0}}>
           <div style={{fontWeight:600,fontSize:15,color:"var(--forest)",flex:1}}>{tree?.name||"Family Tree"}</div>
-          <div style={{display:"flex",gap:12,alignItems:"center"}}>
+          <div className="tree-toolbar-legend" style={{display:"flex",gap:12,alignItems:"center",flexWrap:"wrap"}}>
             {[{color:"#2D4A3E",dash:"none",lbl:"Parent/Child"},{color:"#8B6F47",dash:"4 3",lbl:"Sibling"}].map(l=>(
               <div key={l.lbl} style={{display:"flex",alignItems:"center",gap:5,fontSize:12,color:"var(--fog)"}}>
                 <svg width={22} height={8}><line x1={0} y1={4} x2={22} y2={4} stroke={l.color} strokeWidth={2} strokeDasharray={l.dash}/></svg>
@@ -1167,7 +1229,7 @@ function Families({navigate,trees,onRefresh,showToast,setActiveTreeId}){
   const handleUpdate=async()=>{ try{ await api(`/trees/${editModal.id}`,{method:"PUT",body:editForm}); showToast("Tree updated"); setEditModal(null); onRefresh(); }catch(e){ showToast(e.message,"error"); } };
 
   return(
-    <div className="page" style={{padding:28,overflowY:"auto",height:"100%"}}>
+    <div className="page page-with-mobile-nav" style={{padding:20,overflowY:"auto",height:"100%"}}>
       {createModal&&<CreateTreeModal onCreated={t=>{showToast("Tree created!"); setActiveTreeId(t.id); onRefresh();}} onClose={()=>setCreateModal(false)}/>}
       {editModal&&(
         <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&setEditModal(null)}>
@@ -1269,7 +1331,7 @@ function Activity({trees,activeTreeId}){
   if(loading) return <Spinner/>;
 
   return(
-    <div className="page" style={{padding:28,overflowY:"auto",height:"100%"}}>
+    <div className="page page-with-mobile-nav" style={{padding:20,overflowY:"auto",height:"100%"}}>
       <h2 style={{fontSize:22,marginBottom:6}}>Activity Log</h2>
       <p style={{color:"var(--fog)",fontSize:14,marginBottom:24}}>A live history of all changes across your trees.</p>
       <div className="card" style={{padding:"8px 22px"}}>
@@ -1338,7 +1400,7 @@ function Export({trees,showToast}){
   };
 
   return(
-    <div className="page" style={{padding:28,overflowY:"auto",maxWidth:600,margin:"0 auto"}}>
+    <div className="page page-with-mobile-nav" style={{padding:20,overflowY:"auto",maxWidth:600,margin:"0 auto"}}>
       <h2 style={{fontSize:22,marginBottom:6}}>Export Data</h2>
       <p style={{color:"var(--fog)",fontSize:14,marginBottom:24}}>Download your family tree in your preferred format.</p>
       <div className="card" style={{padding:26,marginBottom:18}}>
@@ -1351,7 +1413,7 @@ function Export({trees,showToast}){
         </div>
         <div>
           <label>Export format</label>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginTop:8}}>
+          <div className="form-grid-3" style={{marginTop:8}}>
             {[{val:"gedcom",label:"GEDCOM",desc:"Standard genealogy format (.ged)"},
               {val:"json",  label:"JSON",  desc:"Full data backup (.json)"},
               {val:"csv",   label:"CSV",   desc:"Spreadsheet compatible (.csv)"}].map(f=>(
@@ -1385,13 +1447,13 @@ function Export({trees,showToast}){
 /* ─── My Profile ──────────────────────────────────────────────────────────── */
 function MemberProfile({user}){
   return(
-    <div className="page" style={{padding:28,overflowY:"auto",maxWidth:640,margin:"0 auto"}}>
+    <div className="page page-with-mobile-nav" style={{padding:20,overflowY:"auto",maxWidth:640,margin:"0 auto"}}>
       <div className="card" style={{padding:28}}>
         <div style={{display:"flex",gap:20,alignItems:"center",marginBottom:24}}>
           <div className="avatar" style={{background:"var(--forest)",color:"#fff",width:68,height:68,fontSize:24}}>{user?.name?makeAvatar(user.name):"?"}</div>
           <div><h2 style={{fontSize:22}}>{user?.name||"…"}</h2><div style={{color:"var(--fog)",fontSize:14,marginTop:4}}>{user?.email||""}</div></div>
         </div>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+        <div className="form-grid-2" style={{gap:12}}>
           {[["Name",user?.name],["Email",user?.email],["Member since",user?.created_at?new Date(user.created_at).getFullYear():"–"]].map(([k,v])=>(
             <div key={k} style={{background:"var(--warm)",padding:"12px 14px",borderRadius:8}}>
               <div style={{fontSize:11,color:"var(--fog)",marginBottom:3}}>{k}</div>
@@ -1430,7 +1492,7 @@ function Settings({user,onLogout,showToast}){
   );
 
   return(
-    <div className="page" style={{padding:28,overflowY:"auto",maxWidth:640,margin:"0 auto"}}>
+    <div className="page page-with-mobile-nav" style={{padding:20,overflowY:"auto",maxWidth:640,margin:"0 auto"}}>
       <h2 style={{fontSize:22,marginBottom:22}}>Settings</h2>
       <Sec title="Account">
         <div style={{marginBottom:14}}><label>Full name</label><input className="input" value={name} onChange={e=>setName(e.target.value)}/></div>
@@ -1465,13 +1527,13 @@ function Author(){
 
   const skills=["React","SVG Visualisation","Genealogy Data Modelling","UI / UX Design","TypeScript","Node.js","Go (Golang)","PostgreSQL / SQLite"];
   const projects=[
-    {name:"Rootswood",   desc:"Full-stack family tree platform with visual genealogy tools.",  tech:"React · Go · SQLite", icon:"tree"  },
-    {name:"AncestorAI",  desc:"AI-powered record matching engine for genealogical research.",   tech:"Python · ML · FastAPI",icon:"search"},
-    {name:"HeritageMaps",desc:"Interactive geographic visualiser for family migration patterns.",tech:"D3.js · GeoJSON",      icon:"globe" },
+    {name:"Rootswood",   desc:"Full-stack family tree platform with visual genealogy tools.",  tech:"React · Go · PostgreSQL", icon:"tree"  },
+    {name:"LifeGift",  desc:"Urgent organ and blood donation matching website.",   tech:"React · Go · PostgreSQL",icon:"search"},
+    {name:"Amar Sheba",desc:"Your Complete Government Service Assistant.",tech:"React · Go · ML · LLM · OCR",      icon:"globe" },
   ];
 
   return(
-    <div className="page" style={{overflowY:"auto",height:"100%"}}>
+    <div className="page page-with-mobile-nav" style={{overflowY:"auto",height:"100%"}}>
       {/* Hero */}
       <div style={{background:"linear-gradient(135deg,var(--forest) 0%,var(--moss) 100%)",padding:"52px 40px 60px",position:"relative",overflow:"hidden"}}>
         {[320,540].map((r,i)=><div key={i} style={{position:"absolute",width:r,height:r,borderRadius:"50%",border:"1px solid rgba(255,255,255,0.07)",top:"50%",right:-r/3,transform:"translateY(-50%)",pointerEvents:"none"}}/>)}
@@ -1544,7 +1606,7 @@ function Author(){
               <button className="btn btn-secondary btn-sm" style={{marginTop:16}} onClick={()=>setSent(false)}>Send another message</button>
             </div>
           ):(
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
+            <div className="form-grid-2" style={{gap:14}}>
               <div><label>Your name *</label><input className="input" placeholder="John Smith" value={contact.name} onChange={e=>f("name",e.target.value)}/></div>
               <div><label>Email address *</label><input className="input" type="email" placeholder="you@example.com" value={contact.email} onChange={e=>f("email",e.target.value)}/></div>
               <div style={{gridColumn:"1/-1"}}><label>Subject</label><input className="input" placeholder="e.g. Feature request, Bug report…" value={contact.subject} onChange={e=>f("subject",e.target.value)}/></div>
@@ -1761,6 +1823,7 @@ export default function App(){
           </main>
         </div>
       </div>
+      <BottomNav current={route} navigate={p=>navigate(p)}/>
     </>
   );
 }
